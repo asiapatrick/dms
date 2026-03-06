@@ -81,6 +81,7 @@ API runs at **http://localhost:3000**. On startup it automatically seeds the dem
 In a separate terminal:
 
 ```bash
+nvm use
 pnpm --filter web dev
 ```
 
