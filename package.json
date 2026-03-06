@@ -1,0 +1,7 @@
+{
+  "name": "vistra-dms",
+  "private": true,
+  "engines": {
+    "node": ">=20.20.0 <21"
+  }
+}

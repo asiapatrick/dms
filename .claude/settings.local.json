@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls /Volumes/Source/patrick/interview/vistra-dms/apps/api/.env*)"
+    ]
+  }
+}

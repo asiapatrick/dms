@@ -1,0 +1,8 @@
+-- AlterTable
+ALTER TABLE `documents` MODIFY `uid` BINARY(16) NOT NULL DEFAULT (UUID_TO_BIN(UUID(), 1));
+
+-- AlterTable
+ALTER TABLE `folders` MODIFY `uid` BINARY(16) NOT NULL DEFAULT (UUID_TO_BIN(UUID(), 1));
+
+-- AlterTable
+ALTER TABLE `users` MODIFY `uid` BINARY(16) NOT NULL DEFAULT (UUID_TO_BIN(UUID(), 1));

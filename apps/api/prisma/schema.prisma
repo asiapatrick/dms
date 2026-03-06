@@ -1,0 +1,165 @@
+// =============================================================================
+// Document Management System — Prisma Schema
+// Target: MySQL
+// =============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  url      = env("DATABASE_URL")
+  provider = "mysql"
+}
+
+// =============================================================================
+// Enums
+// =============================================================================
+
+enum UserRole {
+  ADMIN
+  USER
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  DELETED
+}
+
+enum FolderStatus {
+  ACTIVE
+  DELETED
+}
+
+enum DocumentStatus {
+  ACTIVE
+  DELETED
+}
+
+// =============================================================================
+// User
+// =============================================================================
+
+model User {
+  // Internal surrogate key — never exposed in the API
+  id BigInt @id @default(autoincrement())
+
+  // Public identifier stored as UUID v1 in compact binary form.
+  // UUID_TO_BIN(..., 1) swaps the time-high segment for better index locality.
+  // Do NOT use @default(uuid()) — Prisma would try to store a UUID string into
+  // a Binary(16) column, which MySQL rejects.
+  uid Bytes @unique @db.Binary(16) @default(dbgenerated("(UUID_TO_BIN(UUID(), 1))"))
+
+  name  String
+  email String @unique
+
+  role   UserRole   @default(USER)
+  status UserStatus @default(ACTIVE)
+
+  createdAt DateTime  @default(now())
+  // Soft-delete timestamp; NULL means the record is not deleted.
+  deletedAt DateTime?
+
+  // Relations
+  folders   Folder[]
+  documents Document[]
+
+  @@map("users")
+}
+
+// =============================================================================
+// Folder
+// =============================================================================
+
+model Folder {
+  // Internal surrogate key
+  id BigInt @id @default(autoincrement())
+
+  // Public binary UUID — same pattern as User.uid
+  uid Bytes @unique @db.Binary(16) @default(dbgenerated("(UUID_TO_BIN(UUID(), 1))"))
+
+  // Every folder is owned by exactly one user.
+  userId BigInt
+  user   User   @relation(fields: [userId], references: [id])
+
+  name String
+
+  // Self-referencing FK for folder hierarchy.
+  // NULL = root-level folder (no parent).
+  // Application layer must enforce that parent belongs to the same user.
+  parentFolderId BigInt?
+  parent         Folder?  @relation("FolderChildren", fields: [parentFolderId], references: [id])
+  children       Folder[] @relation("FolderChildren")
+
+  status FolderStatus @default(ACTIVE)
+
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
+
+  // Relations
+  documents Document[]
+
+  // Composite index for listing a user's folders within a given parent.
+  @@index([userId, parentFolderId])
+
+  // Enforce unique folder name per user per parent directory.
+  // Prevents duplicates like two "Reports" folders under the same parent.
+  // Note: NULL parentFolderId values are treated as distinct by MySQL unique
+  // indexes, so multiple root folders with the same name ARE allowed at the
+  // DB level. Application layer should enforce root-level uniqueness if needed.
+  @@unique([userId, parentFolderId, name])
+
+  @@map("folders")
+}
+
+// =============================================================================
+// Document
+// =============================================================================
+
+model Document {
+  // Internal surrogate key
+  id BigInt @id @default(autoincrement())
+
+  // Public binary UUID — same pattern as User.uid
+  uid Bytes @unique @db.Binary(16) @default(dbgenerated("(UUID_TO_BIN(UUID(), 1))"))
+
+  // Every document is owned by exactly one user.
+  userId BigInt
+  user   User   @relation(fields: [userId], references: [id])
+
+  // Optional folder placement; NULL means the document is at the user's root.
+  folderId BigInt?
+  folder   Folder? @relation(fields: [folderId], references: [id])
+
+  // Original file name as uploaded by the client.
+  fileName String
+
+  // S3 object key used to retrieve the file from object storage.
+  s3Key String
+
+  mimeType      String
+  fileSizeBytes BigInt
+
+  status DocumentStatus @default(ACTIVE)
+
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
+
+  // Supports paginated listing of all documents in a folder ordered by date.
+  @@index([userId, folderId, createdAt])
+
+  // Supports filtering by status (e.g. soft-deleted documents) with date sort.
+  @@index([userId, status, createdAt])
+
+  // Supports file-name search / autocomplete scoped to a user.
+  @@index([userId, fileName])
+
+  // Enforce unique file name per user per folder.
+  // Same NULL caveat as Folder: two documents with the same name at root
+  // (folderId IS NULL) are treated as distinct by MySQL's unique index.
+  // Application layer enforces root-level uniqueness.
+  @@unique([userId, folderId, fileName])
+
+  @@map("documents")
+}
