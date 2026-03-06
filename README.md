@@ -4,12 +4,12 @@ A simple Documents Management System that allows users to add and view documents
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|-----------|
-| Frontend | Next.js 16, React 19, Tailwind CSS 4 |
-| Backend | Node.js 20, Express 5, TypeScript |
-| Database | MySQL 8 (via Prisma ORM) |
-| Package manager | pnpm 10 |
+| Layer           | Technology                           |
+| --------------- | ------------------------------------ |
+| Frontend        | Next.js 16, React 19, Tailwind CSS 4 |
+| Backend         | Node.js 20, Express 5, TypeScript    |
+| Database        | MySQL 8 (via Prisma ORM)             |
+| Package manager | pnpm 10                              |
 
 ## Prerequisites
 
@@ -22,7 +22,7 @@ A simple Documents Management System that allows users to add and view documents
 ### 1. Clone the repository
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/asiapatrick/dms/
 cd vistra-dms
 ```
 
@@ -91,17 +91,17 @@ Web app runs at **http://localhost:3001**. Open it in your browser — it signs 
 
 ### `apps/api/.env`
 
-| Variable | Description | Default (local) |
-|----------|-------------|-----------------|
+| Variable       | Description             | Default (local)                           |
+| -------------- | ----------------------- | ----------------------------------------- |
 | `DATABASE_URL` | MySQL connection string | `mysql://root:@localhost:3307/vistra_dms` |
-| `PORT` | API listening port | `3000` |
-| `JWT_SECRET` | Secret for signing JWTs | *(must be set)* |
-| `CORS_ORIGIN` | Allowed frontend origin | `http://localhost:3001` |
+| `PORT`         | API listening port      | `3000`                                    |
+| `JWT_SECRET`   | Secret for signing JWTs | _(must be set)_                           |
+| `CORS_ORIGIN`  | Allowed frontend origin | `http://localhost:3001`                   |
 
 ### `apps/web/.env.local`
 
-| Variable | Description | Default (local) |
-|----------|-------------|-----------------|
+| Variable                   | Description         | Default (local)         |
+| -------------------------- | ------------------- | ----------------------- |
 | `NEXT_PUBLIC_API_BASE_URL` | Base URL of the API | `http://localhost:3000` |
 
 ---
@@ -148,24 +148,24 @@ vistra-dms/
 
 All endpoints except `/auth/login` and `/health` require a `Bearer` token in the `Authorization` header.
 
-| Method | Path | Auth | Description |
-|--------|------|------|-------------|
-| `POST` | `/auth/login` | No | Get a demo JWT (24 h expiry) |
-| `GET` | `/health` | No | Health check |
-| `GET` | `/items` | Yes | List folders and documents in a folder (paginated, sortable) |
-| `POST` | `/folders` | Yes | Create a new folder |
-| `POST` | `/documents` | Yes | Add a document record (simulated upload) |
+| Method | Path          | Auth | Description                                                  |
+| ------ | ------------- | ---- | ------------------------------------------------------------ |
+| `POST` | `/auth/login` | No   | Get a demo JWT (24 h expiry)                                 |
+| `GET`  | `/health`     | No   | Health check                                                 |
+| `GET`  | `/items`      | Yes  | List folders and documents in a folder (paginated, sortable) |
+| `POST` | `/folders`    | Yes  | Create a new folder                                          |
+| `POST` | `/documents`  | Yes  | Add a document record (simulated upload)                     |
 
 ### GET /items — query parameters
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `folder` | string (UID) | *(root)* | List contents of this folder |
-| `page` | number | `1` | Page number |
-| `limit` | number | `20` | Items per page (max 100) |
-| `sortBy` | `name` \| `date` | `name` | Sort field |
-| `sortDir` | `asc` \| `desc` | `asc` | Sort direction |
-| `search` | string | *(none)* | Substring search across folder/file names. Uses a MySQL 8 ngram FULLTEXT index — filtering happens in the DB before pagination, so results span all pages. Minimum 2 characters (ngram token size); shorter values are ignored and all items are returned. |
+| Parameter | Type             | Default  | Description                                                                                                                                                                                                                                                |
+| --------- | ---------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `folder`  | string (UID)     | _(root)_ | List contents of this folder                                                                                                                                                                                                                               |
+| `page`    | number           | `1`      | Page number                                                                                                                                                                                                                                                |
+| `limit`   | number           | `20`     | Items per page (max 100)                                                                                                                                                                                                                                   |
+| `sortBy`  | `name` \| `date` | `name`   | Sort field                                                                                                                                                                                                                                                 |
+| `sortDir` | `asc` \| `desc`  | `asc`    | Sort direction                                                                                                                                                                                                                                             |
+| `search`  | string           | _(none)_ | Substring search across folder/file names. Uses a MySQL 8 ngram FULLTEXT index — filtering happens in the DB before pagination, so results span all pages. Minimum 2 characters (ngram token size); shorter values are ignored and all items are returned. |
 
 ---
 
