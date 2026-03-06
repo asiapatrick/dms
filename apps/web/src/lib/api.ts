@@ -60,6 +60,13 @@ async function apiFetch<T>(
   const res = await fetch(`${API_BASE_URL}${path}`, { ...options, headers });
 
   if (!res.ok) {
+    if (res.status === 401 && typeof window !== "undefined") {
+      _token = null;
+      _userName = null;
+      localStorage.removeItem("dms_token");
+      localStorage.removeItem("dms_user_name");
+      window.location.replace("/");
+    }
     const body = await res.json().catch(() => ({}));
     throw new Error(body?.error?.message ?? `HTTP ${res.status}`);
   }
