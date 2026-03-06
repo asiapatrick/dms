@@ -23,7 +23,7 @@ A simple Documents Management System that allows users to add and view documents
 
 ```bash
 git clone https://github.com/asiapatrick/dms/
-cd vistra-dms
+cd dms
 ```
 
 ### 2. Start MySQL
@@ -56,6 +56,7 @@ CORS_ORIGIN=http://localhost:3001
 From the repo root:
 
 ```bash
+nvm use
 pnpm install
 ```
 
